@@ -1,35 +1,39 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../util/database.config.js';
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../util/database.config');
 
-export const Review = sequelize.define('review', {
+const Review = sequelize.define('review', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     allowNull: false,
-    primaryKey: true,
+    primaryKey: true
   },
   title: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(100),
+    allowNull: false
   },
   comment: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(255),
+    allowNull: false
   },
   rating: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    defaultValue: 1,
+    allowNull: false
   },
   status: {
     type: DataTypes.STRING,
-    allowNull: false,
+    defaultValue: 'active',
+    allowNull: false
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: false
   },
   movieId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-  },
+    allowNull: false
+  }
 });
+
+module.exports = { Review };

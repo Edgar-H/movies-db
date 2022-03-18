@@ -1,31 +1,37 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../util/database.config.js';
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../util/database.config');
 
-export const User = sequelize.define('user', {
+const User = sequelize.define('user', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     allowNull: false,
-    primaryKey: true,
+    primaryKey: true
+  },
+  name: {
+    type: DataTypes.STRING(100),
+    allowNull: false
   },
   userName: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(100),
+    allowNull: false
   },
   email: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(100),
+    allowNull: false
   },
   password: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(255),
+    allowNull: false
   },
   status: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(10),
+    defaultValue: 'active',
+    allowNull: false
   },
   role: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(10),
     allowNull: false,
-  },
+    defaultValue: 'guest' // guest | admin
+  }
 });

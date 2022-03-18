@@ -1,6 +1,5 @@
-import { app } from './app.js';
-import { sequelize } from './src/util/database.config.js';
-import { initModels } from './src/util/initModels.js';
+const { app } = require('./app');
+const { sequelize } = require('./util/database');
 
 const PORT = process.env.PORT || 4000;
 

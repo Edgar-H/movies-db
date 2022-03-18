@@ -1,39 +1,44 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../util/database.config.js';
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../util/database.config');
 
-export const Movie = sequelize.define('movie', {
+const Movie = sequelize.define('movie', {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     allowNull: false,
-    primaryKey: true,
+    primaryKey: true
   },
   title: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(100),
+    allowNull: false
   },
   description: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(100),
+    allowNull: false
   },
   duration: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    defaultValue: 0,
+    allowNull: false
   },
   rating: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    defaultValue: 1,
+    allowNull: false
   },
   img: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(255),
+    allowNull: false
   },
   genres: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(50),
+    allowNull: false
   },
   status: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+    type: DataTypes.STRING(10),
+    defaultValue: 'active',
+    allowNull: false
+  }
 });
+
+module.exports = { Movie };

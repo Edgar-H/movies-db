@@ -1,9 +1,12 @@
+const { ref, uploadBytes } = require('firebase/storage');
+
 const { Movie } = require('../models/movie.model');
 const { AppError } = require('../util/appError');
 const { catchAsync } = require('../util/catchAsync');
 const { filterObj } = require('../util/filterObj');
+import { storage } from '../util/firebase';
 
-const getAllMovies = catchAsync(async (req, res, next) => {
+exports.getAllMovies = catchAsync(async (req, res, next) => {
   const movies = await Movie.findAll();
   if (!movies || movies.length === 0) {
     return next(new AppError(404, 'No movies found'));
@@ -18,7 +21,7 @@ const getAllMovies = catchAsync(async (req, res, next) => {
   });
 });
 
-const getMovieById = catchAsync(async (req, res, next) => {
+exports.getMovieById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const movie = await Movie.findOne({ where: { id } });
   if (!movie) {
@@ -30,26 +33,31 @@ const getMovieById = catchAsync(async (req, res, next) => {
   });
 });
 
-const createNewMovie = catchAsync(async (req, res, next) => {
-  const { title, description, duration, rating, img, genres } = req.body;
+exports.createNewMovie = catchAsync(async (req, res, next) => {
+  const { title, description, duration, genres } = req.body;
   if (
-    !title ||
-    !description ||
-    !duration ||
-    !rating ||
-    !img ||
-    !genres ||
-    title === 0 ||
-    description === 0 ||
-    duration === 0 ||
-    rating === 0 ||
-    img === 0 ||
+    !title &&
+    !description &&
+    !duration &&
+    !genres &&
+    title === 0 &&
+    description === 0 &&
+    duration === 0 &&
     genres === 0
   ) {
     return next(new AppError(400, 'All fields are required'));
   }
 
-  const newMovie = await Movie.create({ ...req.body });
+  // upload image to firebase storage
+  const [name, extension] = req.file.originalname.split('.');
+  const imageName = `${name}_${Date.now()}.${extension}`;
+  const uploadRef = ref(storage, `images/${imageName}`);
+  const uploadImage = await uploadBytes(uploadRef, req.file.buffer);
+
+  const newMovie = await Movie.create({
+    ...req.body,
+    img: uploadImage.metadata.fullPath
+  });
   res.status(201).json({
     status: 'success',
     message: 'Movie created successfully',
@@ -57,7 +65,7 @@ const createNewMovie = catchAsync(async (req, res, next) => {
   });
 });
 
-const updateMovie = catchAsync(async (req, res, next) => {
+exports.updateMovie = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const data = filterObj(req.body, [
@@ -80,7 +88,7 @@ const updateMovie = catchAsync(async (req, res, next) => {
   });
 });
 
-const deleteMovie = catchAsync(async (req, res, next) => {
+exports.deleteMovie = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const movie = await Movie.findOne({ where: { id } });
   if (!movie) {
@@ -93,11 +101,3 @@ const deleteMovie = catchAsync(async (req, res, next) => {
     message: 'Movie deleted successfully'
   });
 });
-
-module.exports = {
-  getAllMovies,
-  getMovieById,
-  createNewMovie,
-  updateMovie,
-  deleteMovie
-};

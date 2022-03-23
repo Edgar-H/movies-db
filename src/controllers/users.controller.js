@@ -9,7 +9,7 @@ const { filterObj } = require('../util/filterObj');
 
 dotenv.config({ path: './config.env' });
 
-const getAllUsers = catchAsync(async (req, res) => {
+exports.getAllUsers = catchAsync(async (req, res) => {
   const users = await User.findAll({ attributes: { exclude: ['password'] } });
   if (!users || users.length === 0) {
     return next(new AppError(404, 'No users found'));
@@ -26,7 +26,7 @@ const getAllUsers = catchAsync(async (req, res) => {
 });
 
 // Get user by ID
-const getUserById = catchAsync(async (req, res, next) => {
+exports.getUserById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const user = await User.findOne({
     where: { id },
@@ -42,7 +42,7 @@ const getUserById = catchAsync(async (req, res, next) => {
 });
 
 // Save new user
-const createUser = catchAsync(async (req, res) => {
+exports.createUser = catchAsync(async (req, res) => {
   const { name, username, email, password } = req.body;
   if (
     !name ||
@@ -91,7 +91,7 @@ const createUser = catchAsync(async (req, res) => {
 });
 
 // Update user(PATCH) for user not admin
-const updateUser = catchAsync(async (req, res) => {
+exports.updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
 
   const data = filterObj(req.body, ['username', 'email']);
@@ -106,7 +106,7 @@ const updateUser = catchAsync(async (req, res) => {
 });
 
 // Delete user
-const deleteUser = catchAsync(async (req, res) => {
+exports.deleteUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const user = await User.findOne({ where: { id } });
   if (!user) {
@@ -116,7 +116,7 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(201).json({ status: 'success', message: 'User deleted' });
 });
 
-const loggingIn = catchAsync(async (req, res) => {
+exports.loggingIn = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || email.trim() === 0) {
@@ -148,11 +148,3 @@ const loggingIn = catchAsync(async (req, res) => {
     data: { token }
   });
 });
-
-module.exports = {
-  getAllUsers,
-  getUserById,
-  createUser,
-  updateUser,
-  deleteUser
-};

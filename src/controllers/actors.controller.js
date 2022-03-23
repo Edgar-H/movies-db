@@ -3,7 +3,7 @@ const { AppError } = require('../util/appError');
 const { catchAsync } = require('../util/catchAsync');
 const { filterObj } = require('../util/filterObj');
 
-const getAllActors = catchAsync(async (req, res) => {
+exports.getAllActors = catchAsync(async (req, res) => {
   const actors = await Actor.findAll();
   if (!actors || actors.length === 0) {
     return next(new AppError(404, 'No actors found'));
@@ -18,7 +18,7 @@ const getAllActors = catchAsync(async (req, res) => {
   });
 });
 
-const getActorById = catchAsync(async (req, res, next) => {
+exports.getActorById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const actor = await Actor.findOne({ where: { id } });
   if (!actor) {
@@ -30,7 +30,7 @@ const getActorById = catchAsync(async (req, res, next) => {
   });
 });
 
-const createActor = catchAsync(async (req, res, next) => {
+exports.createActor = catchAsync(async (req, res, next) => {
   const { name, country, rating, age, profilePic, status } = req.body;
   if (
     !name ||
@@ -56,7 +56,7 @@ const createActor = catchAsync(async (req, res, next) => {
   });
 });
 
-const updateActor = catchAsync(async (req, res, next) => {
+exports.updateActor = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const data = filterObj(req.body, ['name', 'country', 'age']);
@@ -74,7 +74,7 @@ const updateActor = catchAsync(async (req, res, next) => {
   });
 });
 
-const deletedActor = catchAsync(async (req, res, next) => {
+exports.deletedActor = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const actor = await Actor.findOne({ where: { id } });
   if (!actor) {
@@ -88,11 +88,3 @@ const deletedActor = catchAsync(async (req, res, next) => {
     data: 'Actor deleted successfully'
   });
 });
-
-module.exports = {
-  getAllActors,
-  getActorById,
-  createActor,
-  updateActor,
-  deletedActor
-};

@@ -64,9 +64,7 @@ const updateMovie = catchAsync(async (req, res, next) => {
     'title',
     'description',
     'duration',
-    'img',
-    'genres',
-    'status'
+    'genres'
   ]);
 
   const movie = await Movie.findOne({ where: { id } });

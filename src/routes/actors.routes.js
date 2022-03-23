@@ -6,13 +6,14 @@ const {
   updateActor,
   deletedActor
 } = require('../controllers/actors.controller');
+const { validateSession } = require('../middlewares/auh.controller');
 
 const router = express.Router();
 
 router.get('/', getAllActors);
 router.get('/:id', getActorById);
-router.post('/', createActor);
-router.patch('/:id', updateActor);
-router.delete('/:id', deletedActor);
+router.post('/', validateSession, createActor);
+router.patch('/:id', validateSession, updateActor);
+router.delete('/:id', validateSession, deletedActor);
 
 module.exports = { actorsRouter: router };

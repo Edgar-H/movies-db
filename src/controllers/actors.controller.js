@@ -59,13 +59,7 @@ const createActor = catchAsync(async (req, res, next) => {
 const updateActor = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  const data = filterObj(req.body, [
-    'name',
-    'country',
-    'age',
-    'profilePic',
-    'status'
-  ]);
+  const data = filterObj(req.body, ['name', 'country', 'age']);
 
   const actor = await Actor.findOne({ where: { id } });
   if (!actor) {
@@ -75,7 +69,8 @@ const updateActor = catchAsync(async (req, res, next) => {
   await user.update({ ...data });
   res.status(200).json({
     status: 'success',
-    data: 'Actor updated successfully'
+    message: 'Actor updated',
+    data: { data }
   });
 });
 

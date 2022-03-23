@@ -6,13 +6,14 @@ const {
   updateMovie,
   createNewMovie
 } = require('../controllers/movies.controller');
+const { validateSession } = require('../middlewares/auh.controller');
 
 const router = express.Router();
 
 router.get('/', getAllMovies);
 router.get('/:id', getMovieById);
-router.post('/', createNewMovie);
-router.patch('/:id', updateMovie);
-router.delete('/:id', deleteMovie);
+router.post('/', validateSession, createNewMovie);
+router.patch('/:id', validateSession, updateMovie);
+router.delete('/:id', validateSession, deleteMovie);
 
 module.exports = { moviesRouter: router };

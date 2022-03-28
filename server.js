@@ -1,5 +1,6 @@
 const { app } = require('./app');
-const { sequelize } = require('./util/database');
+const { sequelize } = require('./src/util/database.config');
+const { initModels } = require('./src/util/initModels');
 
 const PORT = process.env.PORT || 4000;
 
@@ -12,7 +13,7 @@ sequelize
 initModels();
 
 sequelize
-  .sync()
+  .sync({ force: false })
   .then(() => {
     console.log('Sync successful');
   })

@@ -1,29 +1,30 @@
-const { ref, uploadBytes } = require('firebase/storage');
-
+const { uploadFile } = require('../helpers/uploadFile');
+const { Actor } = require('../models/actor.model');
+const { ActorInMovie } = require('../models/actorInMovie.model');
 const { Movie } = require('../models/movie.model');
+const { Review } = require('../models/review.model');
+
 const { AppError } = require('../util/appError');
 const { catchAsync } = require('../util/catchAsync');
 const { filterObj } = require('../util/filterObj');
-import { storage } from '../util/firebase';
 
 exports.getAllMovies = catchAsync(async (req, res, next) => {
-  const movies = await Movie.findAll();
-  if (!movies || movies.length === 0) {
-    return next(new AppError(404, 'No movies found'));
-  }
-  const filterMovies = movies.filter((movie) => movie.status !== 'deleted');
-  if (filterMovies.length === 0) {
-    return next(new AppError(404, 'No movies found'));
-  }
+  const movies = await Movie.findAll({
+    where: { status: 'active' },
+    includes: [{ model: Actor, through: ActorInMovie }, { model: Review }]
+  });
   res.status(200).json({
     status: 'success',
-    data: filterMovies
+    data: movies
   });
 });
 
 exports.getMovieById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const movie = await Movie.findOne({ where: { id } });
+  const movie = await Movie.findOne({
+    where: { id, status: 'active' },
+    includes: [{ model: Actor, through: ActorInMovie }, { model: Review }]
+  });
   if (!movie) {
     return next(new AppError(404, `Movie not found with id ${id}`));
   }
@@ -34,30 +35,46 @@ exports.getMovieById = catchAsync(async (req, res, next) => {
 });
 
 exports.createNewMovie = catchAsync(async (req, res, next) => {
-  const { title, description, duration, genres } = req.body;
+  const { title, description, duration, genre, actors } = req.body;
   if (
     !title &&
     !description &&
     !duration &&
-    !genres &&
+    !genre &&
     title === 0 &&
     description === 0 &&
     duration === 0 &&
-    genres === 0
+    genre === 0
   ) {
     return next(new AppError(400, 'All fields are required'));
   }
 
   // upload image to firebase storage
   const [name, extension] = req.file.originalname.split('.');
-  const imageName = `${name}_${Date.now()}.${extension}`;
-  const uploadRef = ref(storage, `images/${imageName}`);
-  const uploadImage = await uploadBytes(uploadRef, req.file.buffer);
+  const urlImage = await uploadFile(
+    req.file.buffer,
+    `movies/${name}_${Date.now()}.${extension}`
+  );
 
   const newMovie = await Movie.create({
-    ...req.body,
-    img: uploadImage.metadata.fullPath
+    title,
+    description,
+    duration,
+    genre,
+    img: urlImage
   });
+
+  // Save all actors to database in model ActorInMovie
+  const actorsInMoviewPromise = actors.map(async (actorId) => {
+    const actorInMovie = await ActorInMovie.create({
+      movieId: newMovie.id,
+      actorId
+    });
+    return actorInMovie;
+  });
+
+  await Promise.all(actorsInMoviewPromise);
+
   res.status(201).json({
     status: 'success',
     message: 'Movie created successfully',
@@ -94,10 +111,14 @@ exports.deleteMovie = catchAsync(async (req, res, next) => {
   if (!movie) {
     return next(new AppError(404, `Movie not found with id ${id}`));
   }
-  await movie.update({ status: 'deleted' });
+  try {
+    await movie.update({ status: 'deleted' });
 
-  res.status(200).json({
-    status: 'success',
-    message: 'Movie deleted successfully'
-  });
+    res.status(200).json({
+      status: 'success',
+      message: 'Movie deleted successfully'
+    });
+  } catch (error) {
+    return next(new AppError(500, 'Something went wrong'));
+  }
 });

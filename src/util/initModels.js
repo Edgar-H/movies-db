@@ -6,15 +6,11 @@ const { Movie } = require('../models/movie.model');
 const { Review } = require('../models/review.model');
 
 const initModels = () => {
-  // 1 User <-> many Review
   User.hasMany(Review);
   Review.belongsTo(User);
 
-  // 1 Movie <-> many comments
   Movie.hasMany(Review);
   Review.belongsTo(Movie);
-
-  // M Movie <-> M Actor
 
   Movie.belongsToMany(Actor, { through: ActorInMovie });
   Actor.belongsToMany(Movie, { through: ActorInMovie });

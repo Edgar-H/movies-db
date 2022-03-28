@@ -9,23 +9,18 @@ const { filterObj } = require('../util/filterObj');
 
 dotenv.config({ path: './config.env' });
 
-exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await User.findAll({ attributes: { exclude: ['password'] } });
-  if (!users || users.length === 0) {
-    return next(new AppError(404, 'No users found'));
-  }
-  const filterUsers = users.filter((user) => user.status !== 'deleted');
-  if (filterUsers.length === 0) {
-    return next(new AppError(404, 'No users found'));
-  }
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  const users = await User.findAll({
+    attributes: { exclude: ['password'] },
+    where: { status: 'active' }
+  });
 
   res.status(200).json({
     status: 'success',
-    data: filterUsers
+    data: users
   });
 });
 
-// Get user by ID
 exports.getUserById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const user = await User.findOne({
@@ -42,17 +37,15 @@ exports.getUserById = catchAsync(async (req, res, next) => {
 });
 
 // Save new user
-exports.createUser = catchAsync(async (req, res) => {
-  const { name, username, email, password } = req.body;
+exports.createUser = catchAsync(async (req, res, next) => {
+  const { username, email, password } = req.body;
   if (
-    !name ||
-    !username ||
-    !email ||
-    !password ||
-    name === 0 ||
-    username === 0 ||
-    email === 0 ||
-    password === 0
+    !username &&
+    !email &&
+    !password &&
+    username !== 0 &&
+    email !== 0 &&
+    password !== 0
   ) {
     return next(new AppError(400, 'All fields are required'));
   }
@@ -62,7 +55,8 @@ exports.createUser = catchAsync(async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await User.create({
-      ...req.body,
+      username,
+      email,
       password: hashedPassword
     });
 
@@ -82,17 +76,11 @@ exports.createUser = catchAsync(async (req, res) => {
         return next(new AppError(400, 'Something went wrong'));
     }
   }
-
-  const newUser = await User.create({ ...req.body });
-  res.status(201).json({
-    status: 'success',
-    data: 'User created successfully'
-  });
 });
 
 // Update user(PATCH) for user not admin
-exports.updateUser = catchAsync(async (req, res) => {
-  const { id } = req.params;
+exports.updateUser = catchAsync(async (req, res, next) => {
+  const { id } = req.currentUser;
 
   const data = filterObj(req.body, ['username', 'email']);
 
@@ -101,12 +89,13 @@ exports.updateUser = catchAsync(async (req, res) => {
   if (!user) {
     return next(new AppError(404, `User not found with id ${id}`));
   }
+
   await user.update({ ...data });
   res.status(201).json({ status: 'success', message: 'User updated' });
 });
 
 // Delete user
-exports.deleteUser = catchAsync(async (req, res) => {
+exports.deleteUser = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const user = await User.findOne({ where: { id } });
   if (!user) {
@@ -116,7 +105,7 @@ exports.deleteUser = catchAsync(async (req, res) => {
   res.status(201).json({ status: 'success', message: 'User deleted' });
 });
 
-exports.loggingIn = catchAsync(async (req, res) => {
+exports.loggingIn = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || email.trim() === 0) {

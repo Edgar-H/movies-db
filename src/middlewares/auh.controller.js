@@ -30,3 +30,17 @@ exports.validateSession = catchAsync(async (req, res, next) => {
   req.currentUser = user;
   return next();
 });
+
+exports.protectAdmin = catchAsync(async (req, res, next) => {
+  if (req.currentUser.role !== 'admin') {
+    return next(new AppError(401, 'User is not an admin'));
+  }
+  next();
+});
+
+exports.protectAccountOwner = catchAsync(async (req, res, next) => {
+  if (req.currentUser.id !== +req.params.id) {
+    return next(new AppError(401, 'Not authorized'));
+  }
+  next();
+});

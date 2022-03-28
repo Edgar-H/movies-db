@@ -2,19 +2,6 @@ const multer = require('multer');
 
 const { AppError } = require('../util/appError');
 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'public/uploads/');
-//   },
-//   filename: (req, file, cb) => {
-//     console.log('Uploading file...');
-//     console.table(file);
-//     const [name, extension] = file.originalname.split('.');
-//     const random = Math.floor(Math.random() * 10000);
-//     cb(null, `${name}-${random}-${Date.now()}.${extension}`);
-//   },
-// });
-
 const storage = multer.memoryStorage();
 
 const multerFileFilter = (req, file, cb) => {
@@ -26,7 +13,7 @@ const multerFileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage,
-  fileFilter: multerFileFilter,
+  fileFilter: multerFileFilter
 });
 
 module.exports = { upload };

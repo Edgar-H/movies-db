@@ -8,9 +8,10 @@ const User = sequelize.define('user', {
     allowNull: false,
     primaryKey: true
   },
-  name: {
+  username: {
     type: DataTypes.STRING(100),
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   email: {
     type: DataTypes.STRING(100),
@@ -29,6 +30,8 @@ const User = sequelize.define('user', {
   role: {
     type: DataTypes.STRING(10),
     allowNull: false,
-    defaultValue: 'guest' // guest | admin
+    defaultValue: 'user' // guest | admin
   }
 });
+
+module.exports = { User };

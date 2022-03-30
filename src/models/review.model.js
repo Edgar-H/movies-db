@@ -3,10 +3,10 @@ const { sequelize } = require('../util/database.config');
 
 const Review = sequelize.define('review', {
   id: {
-    type: DataTypes.INTEGER,
+    primaryKey: true,
     autoIncrement: true,
-    allowNull: false,
-    primaryKey: true
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
   title: {
     type: DataTypes.STRING(100),
@@ -18,13 +18,8 @@ const Review = sequelize.define('review', {
   },
   rating: {
     type: DataTypes.INTEGER,
-    defaultValue: 1,
-    allowNull: false
-  },
-  status: {
-    type: DataTypes.STRING,
-    defaultValue: 'active',
-    allowNull: false
+    allowNull: false,
+    defaultValue: 1
   },
   userId: {
     type: DataTypes.INTEGER,
@@ -33,6 +28,11 @@ const Review = sequelize.define('review', {
   movieId: {
     type: DataTypes.INTEGER,
     allowNull: false
+  },
+  status: {
+    type: DataTypes.STRING(10),
+    allowNull: false,
+    defaultValue: 'active'
   }
 });
 

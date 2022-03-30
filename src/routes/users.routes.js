@@ -10,7 +10,8 @@ const {
 
 const {
   validateSession,
-  protectAdmin
+  protectAdmin,
+  protectAccountOwner
 } = require('../middlewares/auh.controller');
 
 const router = express.Router();
@@ -18,9 +19,9 @@ const router = express.Router();
 router.post('/', createUser);
 router.post('/login', loggingIn);
 
-// router.use(validateSession);
+router.use(validateSession);
 router.patch('/:id', protectAccountOwner, updateUser);
-// router.use(protectAdmin);
+router.use(protectAdmin);
 router.get('/', getAllUsers);
 router.get('/:id', getUserById);
 router.delete('/:id', deleteUser);

@@ -2,7 +2,6 @@ const { uploadFile } = require('../helpers/uploadFile');
 const { Actor } = require('../models/actor.model');
 const { ActorInMovie } = require('../models/actorInMovie.model');
 const { Movie } = require('../models/movie.model');
-const { Review } = require('../models/review.model');
 
 const { AppError } = require('../util/appError');
 const { catchAsync } = require('../util/catchAsync');
@@ -11,7 +10,7 @@ const { filterObj } = require('../util/filterObj');
 exports.getAllMovies = catchAsync(async (req, res, next) => {
   const movies = await Movie.findAll({
     where: { status: 'active' },
-    includes: [{ model: Actor, through: ActorInMovie }, { model: Review }]
+    includes: [{ model: Actor, through: ActorInMovie }]
   });
   res.status(200).json({
     status: 'success',
@@ -23,11 +22,9 @@ exports.getMovieById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const movie = await Movie.findOne({
     where: { id, status: 'active' },
-    includes: [{ model: Actor, through: ActorInMovie }, { model: Review }]
+    includes: [{ model: Actor, through: ActorInMovie }]
   });
-  if (!movie) {
-    return next(new AppError(404, `Movie not found with id ${id}`));
-  }
+
   res.status(200).json({
     status: 'success',
     data: movie
@@ -63,23 +60,25 @@ exports.createNewMovie = catchAsync(async (req, res, next) => {
     genre,
     img: urlImage
   });
-
-  // Save all actors to database in model ActorInMovie
-  const actorsInMoviewPromise = actors.map(async (actorId) => {
-    const actorInMovie = await ActorInMovie.create({
-      movieId: newMovie.id,
-      actorId
+  try {
+    const actorsInMoviewPromise = actors.map(async (actorId) => {
+      return await ActorInMovie.create({
+        movieId: newMovie.id,
+        actorId
+      });
     });
-    return actorInMovie;
-  });
 
-  await Promise.all(actorsInMoviewPromise);
+    await Promise.all(actorsInMoviewPromise);
 
-  res.status(201).json({
-    status: 'success',
-    message: 'Movie created successfully',
-    data: newMovie
-  });
+    res.status(201).json({
+      status: 'success',
+      message: 'Movie created successfully',
+      data: newMovie
+    });
+  } catch (error) {
+    console.log(error);
+    next(new AppError(400, 'Something went wrong'));
+  }
 });
 
 exports.updateMovie = catchAsync(async (req, res, next) => {

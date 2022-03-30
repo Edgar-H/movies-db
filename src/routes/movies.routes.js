@@ -14,10 +14,10 @@ const { upload } = require('../util/multer');
 
 const router = express.Router();
 
-// router.use(validateSession);
+router.use(validateSession);
 router.get('/', getAllMovies);
 router.get('/:id', getMovieById);
-// router.use(protectAdmin);
+router.use(protectAdmin);
 router.post('/', upload.single('img'), createNewMovie);
 router.patch('/:id', updateMovie);
 router.delete('/:id', deleteMovie);

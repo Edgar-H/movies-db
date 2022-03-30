@@ -2,6 +2,7 @@ const { Actor } = require('../models/actor.model');
 const { AppError } = require('../util/appError');
 const { catchAsync } = require('../util/catchAsync');
 const { filterObj } = require('../util/filterObj');
+const { uploadFile } = require('../helpers/uploadFile');
 
 exports.getAllActors = catchAsync(async (req, res, next) => {
   const actors = await Actor.findAll({ where: { status: 'active' } });
